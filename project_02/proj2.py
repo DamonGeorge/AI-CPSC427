@@ -1,10 +1,15 @@
 '''
 WRITTEN FOR PYTHON 2.7
+Class: CPSC 427-01
+
 Team Member #1: Robert Brajcich
 Team Member #2: Damon George
-Zagmail address for team member 1: rbrajcich@zagmail.gonzaga.edu
+Submitted By: Robert Brajcich
+GU username: rbrajcich
+
 Project 2: A Python Exercise
 Due: 1/25/2019
+To run: python proj2.py
 '''
 
 def get_file_name(is_first_attempt = True):
