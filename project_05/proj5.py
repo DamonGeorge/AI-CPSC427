@@ -12,6 +12,10 @@ Date: 15 February 2019
 
 from copy import deepcopy
 
+#set a depth limit for the depth-first search.
+#set to 0 for unlimited depth
+DEPTH_LIMIT = 5
+
 #displays the given state
 def display(state):
     for row in state:
@@ -76,15 +80,24 @@ def depth_first(start, goal):
     closed = []
     children = []
 
+    # stack to hold number of children
+    # left to examine on each depth level going up
+    depths = [1]
+    cur_depth = 0
+
     cur_state_step_no = 1;
 
     # add starting state and begin search
     open.append(start)
     while (len(open) > 0):
-        
+
+        while depths[-1] == 0:
+            cur_depth -= 1
+            depths.pop()
+
         # get next item in "open" stack
         cur = open.pop()
-        print("Step " + str(cur_state_step_no))
+        print("Step " + str(cur_state_step_no) + " - Depth " + str(cur_depth))
         cur_state_step_no += 1 
         display(cur)
         
@@ -94,18 +107,24 @@ def depth_first(start, goal):
         
         #should be in closed states after analyzing
         closed.append(cur)
+        depths[-1] -= 1     # mark this state as done in depths stack
         
-        # add each child of cur to stack
-        for child in gen_child_states(cur): # moving left to right
-            children.append(child)
+        if DEPTH_LIMIT == 0 or cur_depth < DEPTH_LIMIT:         
+            # add each child of cur to stack
+            for child in gen_child_states(cur): # moving left to right
+                children.append(child)
+
+            depths.append(0)
+            cur_depth += 1
+
+            # popping each child of cur from stack, add to open if not already
+            # analyzed or waiting to be analyzed
+            while(len(children) > 0):
+                child = children.pop()
+                if (child not in open and child not in closed):
+                    open.append(child)
+                    depths[-1] += 1
         
-        # popping each child of cur from stack, add to open if not already
-        # analyzed or waiting to be analyzed
-        while(len(children) > 0):
-            child = children.pop()
-            if (child not in open and child not in closed):
-                open.append(child)
-    
     return False
 
 
