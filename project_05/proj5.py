@@ -73,6 +73,9 @@ def gen_child_states(cur_state):
 
     return children
 
+# performs depth-first search on the 8-puzzle given as start
+# on its journey towards the 8 puzzle arrangement given in goal.
+# depth is limited by the global constant DEPTH_LIMIT defined earlier
 def depth_first(start, goal):
     
     # init stacks/queues
