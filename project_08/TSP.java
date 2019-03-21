@@ -10,7 +10,7 @@ public class TSP extends GA
 
  public TSP(String paramsFileName, String target, String inputDataFilename, int matingType)
     {
-        super(paramsFileName,target);
+        super(paramsFileName,target, matingType);
         
         costMatrix = new ArrayList<List<Integer>>();
 

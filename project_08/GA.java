@@ -10,19 +10,24 @@ public abstract class GA extends Object
  protected int     GA_numIterations;
  protected ArrayList<Chromosome> GA_pop;
  protected String GA_target;
+ protected int      GA_matingType;
+ protected int      GA_tournamentSize;
 
- public GA(String ParamFile, String target)
+ public GA(String ParamFile, String target, int matingType)
     {
-        GetParams GP        = new GetParams(ParamFile);
-        Parameters P        = GP.GetParameters();
-        GA_numChromesInit   = P.GetNumChromesI();
-        GA_numChromes       = P.GetNumChromes();
-        GA_numGenes         = P.GetNumGenes();
-        GA_mutFact          = P.GetMutFact();
-        GA_numIterations    = P.GetNumIterations();
+        Params params = new Params(ParamFile);
+
+        GA_numChromesInit   = params.getInitialChromes();
+        GA_numChromes       = params.getNumChromes();
+        GA_numGenes         = params.getNumGenes();
+        GA_mutFact          = params.getMutationFactor();
+        GA_numIterations    = params.getNumGenerations();
+        GA_tournamentSize   = params.getTournamentSize();
+
         GA_pop              = new ArrayList<Chromosome>();
         GA_target           = target;
-        }
+        GA_matingType       = matingType;
+    }
 
  public void DisplayParams()
     {
@@ -154,8 +159,24 @@ public abstract class GA extends Object
 
         while (iterationCt < GA_numIterations)
             {
-                pairs = Pair.getTopDownPairs(GA_pop);
-                GA_pop = Mate.cycleCrossover(pairs, GA_numGenes);
+                switch(GA_matingType) {
+                case 0:
+                    pairs = Pair.getTopDownPairs(GA_pop);
+                    GA_pop = Mate.cycleCrossover(pairs, GA_numGenes);
+                    break;
+                case 1:
+                    pairs = Pair.getTopDownPairs(GA_pop);
+                    GA_pop = Mate.partiallyMatchedCrossover(pairs, GA_numGenes);
+                    break;
+                case 2:
+                    pairs = Pair.getTournamentPairs(GA_pop, GA_tournamentSize);
+                    GA_pop = Mate.cycleCrossover(pairs, GA_numGenes);
+                    break;
+                default:
+                    pairs = Pair.getTournamentPairs(GA_pop, GA_tournamentSize);
+                    GA_pop = Mate.partiallyMatchedCrossover(pairs, GA_numGenes);
+                    break;
+                }
 
                 Mutate();
                 

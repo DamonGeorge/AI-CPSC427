@@ -46,65 +46,46 @@ public class Mate
         return newPop;
     }
 
+    public static ArrayList<Chromosome> partiallyMatchedCrossover(ArrayList<Pair> pairs, int numGenes) {
+        ArrayList<Chromosome> newPop = new ArrayList<>();
+        Random random = new Random();
 
+        for(Pair pair : pairs) {
+            Chromosome parent1 = pair.getParent1();
+            Chromosome parent2 = pair.getParent2();
+           
+            //start and end crosspoints -> inclusive
+            int crossPoint1 = random.nextInt(numGenes); 
+            int crossPoint2 = crossPoint1 + random.nextInt(numGenes - crossPoint1);
 
+            //num chars to switch. (1 to numGenes)
+            int crossSize = (crossPoint2 - crossPoint1) + 1;
 
+            Chromosome child1 = generatePMXChild(parent1, parent2, crossPoint1, crossSize);
+            Chromosome child2 = generatePMXChild(parent2, parent1, crossPoint1, crossSize);
 
-
-
- private    Chromosome MT_father, MT_mother, MT_child1, MT_child2;
- private    int MT_posChild1, MT_posChild2, MT_posLastChild,MT_posFather, MT_posMother,
-             MT_numGenes, MT_numChromes;
-
- public Mate(ArrayList<Chromosome> population, int numGenes, int numChromes)
-    {
-        MT_numGenes     = numGenes;
-        MT_numChromes   = numChromes;
-        
-        MT_posChild1    = population.size()/2;
-        MT_posChild2    = MT_posChild1 + 1;
-        MT_posLastChild= population.size() - 1;
-        
-        for (int i = MT_posLastChild; i >= MT_posChild1; i--)
-            population.remove(i);
-        
-        MT_posFather = 0;
-        MT_posMother = 1;
-    }
- //Simple Top-Down Pairing
- public ArrayList<Chromosome> Crossover(ArrayList<Chromosome> population, int numPairs)
-    {
-        for (int j = 0; j < numPairs; j++)
-        {
-            MT_father       =  population.get(MT_posFather);
-            MT_mother       =  population.get(MT_posMother);
-            MT_child1       = new Chromosome(MT_numGenes);
-            MT_child2       = new Chromosome(MT_numGenes);
-            Random rnum     = new Random();
-            int crossPoint  = rnum.nextInt(MT_numGenes);
-
-            //left side
-            for (int i = 0; i < crossPoint; i++)
-                {
-                    MT_child1.SetGene(i,MT_father.GetGene(i));
-                    MT_child2.SetGene(i,MT_mother.GetGene(i));
-                }
-    
-            //right side 
-            for (int i = crossPoint; i < MT_numGenes; i++)
-                {
-                    MT_child1.SetGene(i, MT_mother.GetGene(i));
-                    MT_child2.SetGene(i, MT_father.GetGene(i));
-                }
-                
-            population.add(MT_posChild1,MT_child1);
-            population.add(MT_posChild2,MT_child2);
-            
-            MT_posChild1    = MT_posChild1 + 2;
-            MT_posChild2    = MT_posChild2 + 2;
-            MT_posFather    = MT_posFather + 2;
-            MT_posMother    = MT_posMother + 2;
+            newPop.add(parent1);
+            newPop.add(parent2);
+            newPop.add(child1);
+            newPop.add(child2);
         }
-        return population;
+
+        return newPop;
+    }
+
+
+    private static Chromosome generatePMXChild(Chromosome parent1, Chromosome parent2, int crossStart, int crossLength) {
+        Chromosome child = new Chromosome(parent1);
+
+        for (int i = crossStart; i < crossLength; i++) {
+            char geneToRemove = child.GetGene(i);
+            char geneToAdd = parent2.GetGene(i);
+
+            int switchIndex = child.findGene(geneToAdd);
+            child.SetGene(i, geneToAdd);
+            child.SetGene(switchIndex, geneToRemove);
+        }
+
+        return child;
     }
  }

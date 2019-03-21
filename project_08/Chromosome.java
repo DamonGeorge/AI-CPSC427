@@ -63,5 +63,15 @@ public class Chromosome
         return true;
     }
 
+ public int findGene(char ch) {
+    for(int i = 0; i < CH_numGenes; i++) {
+        if(CH_gene[i] == ch) {
+            return i;
+        }
+    }
+    //get here not found
+    return -1;
+ }
+
 }
 

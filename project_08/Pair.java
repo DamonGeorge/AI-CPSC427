@@ -15,8 +15,9 @@ public class Pair
 	public static ArrayList<Pair> getTopDownPairs(ArrayList<Chromosome> population) {
 		ArrayList<Pair> pairs = new ArrayList<>();
 
+		int numLoops = population.size()/2;
 		//increment every two chromosomes
-        for (int i = 0; i < population.size()/2; i+=2) {
+        for (int i = 0; i < numLoops; i+=2) {
         	Pair pair = new Pair(population.get(i), population.get(i+1));
         	pairs.add(pair);
         }
@@ -27,8 +28,9 @@ public class Pair
 	public static ArrayList<Pair> getTournamentPairs(ArrayList<Chromosome> population, int tournamentSize) {
 		ArrayList<Pair> pairs = new ArrayList<>();
 		
+		int numLoops = population.size()/4;
 
-        for (int i = 0; i < population.size()/4; i++) {
+        for (int i = 0; i < numLoops; i++) {
         	Pair pair = new Pair(tournamentSelect(population, tournamentSize), tournamentSelect(population, tournamentSize));
         	pairs.add(pair);
         }
