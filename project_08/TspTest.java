@@ -17,8 +17,8 @@ public class TspTest {
         System.out.println();
         tsp.DisplayParams(); //Uncomment to display the contents of the parameter file
         tsp.DisplayPop(); //Uncomment to display the population before evolution
-        //tsp.Evolve();
-        //WG1.DisplayPop(); Uncomment to display the population after evolution
+        tsp.Evolve();
+        tsp.DisplayPop(); //Uncomment to display the population after evolution
         System.out.println();
     }
 }

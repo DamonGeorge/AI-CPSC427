@@ -147,14 +147,16 @@ public abstract class GA extends Object
  protected void Evolve()
     {
         int iterationCt = 0;
-        Pair pairs      = new Pair(GA_pop);
-        int numPairs    = pairs.SimplePair();
+        //Pair pairs      = new Pair(GA_pop);
+        //int numPairs    = pairs.SimplePair();
         boolean found   = false;
+        ArrayList<Pair> pairs;
 
         while (iterationCt < GA_numIterations)
             {
-                Mate mate = new Mate(GA_pop,GA_numGenes,GA_numChromes);
-                GA_pop = mate.Crossover(GA_pop,numPairs);
+                pairs = Pair.getTopDownPairs(GA_pop);
+                GA_pop = Mate.cycleCrossover(pairs, GA_numGenes);
+
                 Mutate();
                 
                 ComputeCost();
@@ -165,8 +167,8 @@ public abstract class GA extends Object
                 
                 DisplayBest(iterationCt); //print it
 
-                if (chrome.Equals(GA_target)) //if it's equal to the target, stop
-                    break;
+                //if (chrome.Equals(GA_target)) //if it's equal to the target, stop
+                //    break;
                 ++iterationCt;
             }
     }

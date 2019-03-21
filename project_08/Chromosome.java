@@ -13,6 +13,17 @@ public class Chromosome
         CH_gene     = new char[CH_numGenes];
     }
 
+//copy constructor
+ public Chromosome(Chromosome chromosome) {
+    CH_numGenes = chromosome.GetNumGenes();
+    CH_cost = chromosome.GetCost();
+    //copy over genes
+    CH_gene = new char[CH_numGenes];
+    for(int i = 0; i < CH_numGenes; i++) {
+        CH_gene[i] = chromosome.GetGene(i);
+    }
+ }
+
  public int GetNumGenes()
     {
         return CH_numGenes;
