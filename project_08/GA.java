@@ -13,8 +13,10 @@ public abstract class GA extends Object
  protected int      GA_matingType;
  protected int      GA_tournamentSize;
 
+
  public GA(String ParamFile, String target, int matingType)
     {
+        //Get the params from the provided properties file
         Params params = new Params(ParamFile);
 
         GA_numChromesInit   = params.getInitialChromes();
@@ -159,6 +161,7 @@ public abstract class GA extends Object
 
         while (iterationCt < GA_numIterations)
             {
+                //Choose which pairing/mating combo to use 
                 switch(GA_matingType) {
                 case 0:
                     pairs = Pair.getTopDownPairs(GA_pop);
@@ -178,14 +181,12 @@ public abstract class GA extends Object
                     break;
                 }
 
+                //the rest of the algorithm
                 Mutate();
-                
                 ComputeCost();
-                
                 SortPop();
                 
                 Chromosome chrome = GA_pop.get(0); //get the best guess
-                
                 DisplayBest(iterationCt); //print it
 
                 //if (chrome.Equals(GA_target)) //if it's equal to the target, stop

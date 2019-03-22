@@ -1,7 +1,6 @@
 /*
- Usage: java TspTest <paramFile> <dataFile> <Mate/Pair Type>
- Example: java WordGuess param.dat genetic
-    Using the parameter file, param.dat, try to generate the word "genetic."
+ Usage: java TspTest <configFilename> <inputDataFilename> <Mate/Pair Type>
+ Example: java TspTest config.properties tsp_input_data.csv 0
 */
 
 import java.lang.*;
@@ -15,11 +14,10 @@ public class TspTest {
         TSP tsp = new TSP(args[0],"", args[1], Integer.parseInt(args[2]));
 
         System.out.println();
-        tsp.DisplayParams(); //Uncomment to display the contents of the parameter file
-        tsp.DisplayPop(); //Uncomment to display the population before evolution
+        //tsp.DisplayParams(); //Uncomment to display the contents of the parameter file
+        //tsp.DisplayPop(); //Uncomment to display the population before evolution
         tsp.Evolve();
-        tsp.DisplayPop(); //Uncomment to display the population after evolution
-        System.out.println();
+        //tsp.DisplayPop(); //Uncomment to display the population after evolution
     }
 }
 

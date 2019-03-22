@@ -3,31 +3,37 @@ import java.lang.*;
 import java.io.*;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * Traveling Salesman implementation of the Genetic Algorithm
+ */
+public class TSP extends GA {
+    //Cost for all paths
+    private List<List<Integer>> costMatrix;
 
-public class TSP extends GA
-{
- private List<List<Integer>> costMatrix;
-
- public TSP(String paramsFileName, String target, String inputDataFilename, int matingType)
-    {
+    //main constructor used by TspTest
+    public TSP(String paramsFileName, String target, String inputDataFilename, int matingType) {
+        //create GA
         super(paramsFileName,target, matingType);
         
+        //parse costs from file
         costMatrix = new ArrayList<List<Integer>>();
-
         parseInputData(inputDataFilename);
 
-        if (costMatrix.size() != GA_numGenes)
-        {
+        //Confirm input costs match the number of genes
+        if (costMatrix.size() != GA_numGenes) {
             System.out.println("Error: Input data size differs from number of genes");
             DisplayParams();
             System.exit(1);
         }
 
+        //initialize the population
         InitPop();
     }
 
- private void parseInputData(String filename) 
-    {
+    /**
+     * Parse the cost data from the given file
+     */
+    private void parseInputData(String filename) {
         //read csv into matrix of strings
         List<String[]> rowList = new ArrayList<String[]>();
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
@@ -36,8 +42,7 @@ public class TSP extends GA
                 String[] lineItems = line.split(",");
                 rowList.add(lineItems);
             }
-        }
-        catch(Exception e){
+        } catch(Exception e){
             System.out.println("Error parsing input file!");
             System.exit(1);
         }
@@ -56,26 +61,21 @@ public class TSP extends GA
                 }
             }
             
-            
             costMatrix.add(newRow);
         }
-
-        for(List<Integer> row : costMatrix) {
-            for(Integer val: row) {
-                System.out.print(val + ", ");
-            }
-            System.out.println("");
-        }
-
     }
 
- private void generatePop() 
-    {
+    /**
+     * Generate the population by shuffling all possible nodes
+     */
+    private void generatePop() {
+        //create list of all possible genes
         List<Character> allGenes = new ArrayList<Character>();
         for (int i = 0; i < GA_numGenes; i++) {
             allGenes.add(i, (char) (97+i)); //starting from 'a'
         }
 
+        //create population by shuffling genes
         for(int i = 0; i < GA_numChromesInit; i++) {
             //shuffle possible genes
             Collections.shuffle(allGenes);
@@ -91,10 +91,10 @@ public class TSP extends GA
         }
     }
 
- public void InitPop()
-    {
-        System.out.println("Test!");
-        //super.InitPop();
+    /**
+     * Initialize the population
+     */
+    public void InitPop(){
         generatePop();
         ComputeCost();
         SortPop();
@@ -102,43 +102,46 @@ public class TSP extends GA
     }
 
 
- public void DisplayParams()
-    {
-        //System.out.print("Input Data Filename: ");
-        //System.out.println(WG_target);
+    public void DisplayParams(){
         super.DisplayParams();
     }
 
- protected void ComputeCost()
-    {
-        for (int i = 0; i < GA_pop.size(); i++)
-        {
+    /**
+     * Compute the cost of all chromosomes in the population
+     * by adding all costs of edges in the TSP 
+     */
+    protected void ComputeCost() {
+        //Loop through all chromosomes
+        for (int i = 0; i < GA_pop.size(); i++) {
             int cost = 0;
             Chromosome chrom = GA_pop.remove(i);
-            //start and end of current path
+
+            //Compute cost from each node to the next
             int start = 0, end = 1;
             for (int j = 0; j < GA_numGenes; j++) {
                 cost += costMatrix.get(chrom.GetGene(start) - 97).get(chrom.GetGene(end) - 97);
-
-
+                //increment current location
                 start++;
                 end++;
                 end = end % GA_numGenes;
             }
+
+            //set costs
             chrom.SetCost(cost);
             GA_pop.add(i,chrom);
         }
     }
 
- @Override
- protected void Mutate() 
-    {
+    /**
+     * Mutate TSP genes by switching places of randomly chosen genes
+     */
+    @Override
+    protected void Mutate()  {
         int totalGenes  = (GA_numGenes * GA_numChromes);
         int numMutate   = (int) (totalGenes * GA_mutFact);
         Random rnum     = new Random();
 
-        for (int i = 0; i < numMutate; i++) 
-        {
+        for (int i = 0; i < numMutate; i++)  {
             //position of chromosome to mutate--but not the first one
             //the number generated is in the range: [1..GA_numChromes)
             int chromMut = 1 + (rnum.nextInt(GA_numChromes - 1));
@@ -155,7 +158,5 @@ public class TSP extends GA
 
             GA_pop.add(newChromosome); //add mutated chromosome at the end
         }
-        
     }
  }
-

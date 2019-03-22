@@ -63,13 +63,16 @@ public class Chromosome
         return true;
     }
 
+ /**
+  * Find the index of the given char in the chromosome's genes
+  */
  public int findGene(char ch) {
     for(int i = 0; i < CH_numGenes; i++) {
         if(CH_gene[i] == ch) {
             return i;
         }
     }
-    //get here not found
+    //not found if we are here
     return -1;
  }
 
