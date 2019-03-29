@@ -1,10 +1,10 @@
 '''
 Class: CPSC 427 
-Team Member 1: Paul De Palma
-Team Member 2: None
-Submitted By Paul De Palma
-GU Username: depalma
-File Name: abPrune.py
+Team Member 1: Robert Brajcich
+Team Member 2: Damon George
+Submitted By Robert Brajcich
+GU Username: rbrajcich
+File Name: proj9-ABPrune.py
 Demonstrates AB Pruning:
 --reads file representation of a tree as input
 --converts the file to a dictionary representation of a tree
@@ -13,21 +13,34 @@ Demonstrates AB Pruning:
   (Nilsson, N. (1998). Artificial Intelligence: A New Synthesis. 
   Morgan Kaufmann)
 --Jeff Wheadon (GU, class of 2018) wrote the 1st draft of maxVal and minVal.
-Usage 1:  python <program name> <file name> <player>
-          python proj9_abPrune.py abEx5.txt max
+--Includes depth limit implementation by Robert Brajcich and Damon George
+Usage 1:  python <program name> <file name> <player> <depth-limit> 
+          python proj9_abPrune.py abEx5.txt max 5
 Usage 2: The program can also be run from idle, in which case the 
          parameters must be hard-coded
+Note: Depth limit of 0 signifies unbounded depth
 '''
 
 import sys
+import random
 
-def maxVal(graph,node,alpha,beta):
+# returns a random value for the given node for use
+# with the depth-limiting functionality. This will be called on
+# nodes that are at the deepest depth to determine their value
+# without continuing the alpha beta recursion further
+# NOTE in a real application this function would be a meaningful heuristic
+def staticVal(graph, node):
+    return random.randint(1, 100)
+
+def maxVal(graph,node,alpha,beta,depth,depth_limit):
     print node
     if isinstance(node,int):
         return node
+    if depth_limit > 0 and depth == depth_limit: # check depth limit
+        return staticVal(graph,node)
     v = float("-inf")
     for child in graph.get(node):
-        v1 = minVal(graph,child,alpha,beta)
+        v1 = minVal(graph,child,alpha,beta,depth+1,depth_limit)
         if v is None or v1 > v:
             v = v1
         if beta is not None:
@@ -37,13 +50,15 @@ def maxVal(graph,node,alpha,beta):
             alpha = v1
     return v
 
-def minVal(graph,node,alpha,beta):
+def minVal(graph,node,alpha,beta,depth,depth_limit):
     print node
     if isinstance(node,int):
         return node
+    if depth_limit > 0 and depth == depth_limit: # check depth limit
+        return staticVal(graph,node)
     v = float("inf")
     for child in graph.get(node):
-        v1 = maxVal(graph,child,alpha,beta)
+        v1 = maxVal(graph,child,alpha,beta,depth+1,depth_limit)
         if v is None or v1 < v:
             v = v1
         if alpha is not None:
@@ -99,22 +114,27 @@ def read_graph(file_name):
    
     return str(root),graph
 
-def AB(graph,root,alpha,beta,player):
+def AB(graph,root,alpha,beta,player,depth_limit):
     if player == 'max':
-        maxVal(graph,root,alpha, beta)
+        maxVal(graph,root,alpha,beta,1,depth_limit)
     else:
-        minVal(graph,root,alpha,beta)
+        minVal(graph,root,alpha,beta,1,depth_limit)
         
 
 def main():
     if len(sys.argv) > 1:           #parameters come from command line  
         file_name = sys.argv[1]  
         player = sys.argv[2]
+        depth_limit = int(sys.argv[3])
     else:
         file_name = 'abEx1.txt'     #default
         player = 'max'
+        depth_limit = 0             # depth limit 0 means unbounded depth
 
     root, graph = read_graph(file_name)
-    AB(graph,root, None, None, player)
+    AB(graph,root, None, None, player,depth_limit)
 
-main()
+
+# call main when run as a program
+if __name__ == "__main__":
+    main()
