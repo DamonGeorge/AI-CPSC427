@@ -43,6 +43,7 @@ public abstract class GA extends Object
         System.out.println(GA_mutFact);
         System.out.print("Iterations: ");
         System.out.println(GA_numIterations);
+        System.out.println("Tournament Size: " + GA_tournamentSize);
     }
 
  public void DisplayPop()

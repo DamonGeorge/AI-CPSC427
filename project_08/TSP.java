@@ -26,8 +26,32 @@ public class TSP extends GA {
             System.exit(1);
         }
 
+        DisplayParams();
+        DisplayMatingType();
+
         //initialize the population
         InitPop();
+    }
+
+    /**
+     * Display the pair and mating algorithm types
+     */
+    public void DisplayMatingType() {
+        System.out.println("\nPair & Mating Algorithms:");
+        switch(GA_matingType) {
+        case 0:
+            System.out.println("Top Down    &   Cycle Crossover");
+            break;
+        case 1:
+             System.out.println("Top Down   &   Partially Matched Crossover");
+            break;
+        case 2:
+             System.out.println("Tournament &   Cycle Crossover");
+            break;
+        default:
+             System.out.println("Tournament &   Partially Matched Crossover");
+            break;
+        }
     }
 
     /**
