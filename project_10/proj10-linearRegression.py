@@ -6,14 +6,13 @@ Team Member 2: Damon George
 Submitted By Damon George
 GU Username: dgeorge2
 File Name: proj10-linearRegression.py
-Vectorized Linear Regression
+Project 10: Vectorized Linear Regression
 Usage: python3 proj10-linearRegression.py
 Date: 5 April 2019
 '''
 import numpy
 import csv
 import matplotlib.pyplot as plt
-
 
 '''
 Reads csv file of vectors into numpy float array
@@ -27,8 +26,8 @@ def get_csv_data(filename):
 Creates the vectors necessary for the vectorized linear regression from the points array.
 This returns the X, X_T, Y, and Theta matrices.
 X is NxM where N is the number of Features, and M is the number of samples. 
-The first column is just 1s and the rest of the columns 
-are cols 0 through M-1 of the points matrix
+The first row is just 1s and the rest of the rows 
+are cols 0 through N-1 of the points matrix
 X_T is X transposed
 Y is Mx1 and is the last column of the points matrix
 Theta is Nx1 of zeros
@@ -60,7 +59,7 @@ def gradient_descent(points, learning_rate, num_iterations):
 	return Theta
 
 '''
-Uses matplotlib to plot 2d points and the optimized line
+Uses matplotlib to plot 2d points and the given line: y = m*x+b
 '''
 def plot_results(points,m,b):
 	x_training = [point[0] for point in points]
@@ -73,7 +72,7 @@ def plot_results(points,m,b):
 
 
 def main():
-	#Get the csv points data
+	#Get the list of data points from the csv
 	points = get_csv_data("input.csv")
 
 	#set the initial parameters
@@ -82,10 +81,10 @@ def main():
 
 	#vectorized linear regression!
 	Theta = gradient_descent(points, learning_rate, num_iter)
-	print("Theta = ", end='')
+	print("Theta:")
 	print(Theta)
 	
-	#if 2 features (i.e. y = mx+b), plot the results
+	#if 2 features (i.e. y = m*x+b), plot the results
 	if(Theta.shape[0] == 2):
 		plot_results(points,Theta[1],Theta[0])
 
