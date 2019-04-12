@@ -52,11 +52,10 @@ def distEucl(vecA,vecB):
 def kMeans(dataMat, k, distMeas=distEucl, createCent=randCent):
     m = np.shape(dataMat)[0]  #how many items in data set
     
-    #create an mX2 natrix filled with -1's (uninititialized value)
+    #create an mX1 natrix filled with -1's (uninititialized value)
     #each row stores centroid information for a point
     #col 0 stores the centroid index to which the point belongs
-    #col 1 stores the distance from the point to the centroid
-    clusterAssment = np.mat(np.ones((m,2)))
+    clusterAssment = np.mat(np.ones((m,1)))
     clusterAssment = np.negative(clusterAssment)
 
     #create k randomly placed centroids
@@ -67,37 +66,22 @@ def kMeans(dataMat, k, distMeas=distEucl, createCent=randCent):
     pointShifted = True
     while pointShifted:
         iterations = iterations + 1
-        pointShifted = False
-
-        # calculate the cluster for each data point
-        for j in range(m):
-            newCentroid = 0
-            minDist = float("inf")
-            for i in range(k):
-                dist = distEucl(dataMat[j], centroids[i])
-                if dist < minDist:
-                    newCentroid = i
-                    minDist = dist
-            clusterAssment[j, 1] = minDist
-            if clusterAssment[j, 0] != newCentroid:
-                pointShifted = True
-                clusterAssment[j, 0] = newCentroid
+        
+        # calculate nearest centroid for each point
+        distances = np.apply_along_axis(lambda vec1: np.apply_along_axis(distMeas, 1, dataMat, vec1), 1, centroids)
+        newClusters = np.argmin(distances, 0)
+        pointShifted = not np.array_equal(newClusters, clusterAssment)
+        clusterAssment = newClusters
 
         # calculate mean for each centroid by summing x and y points
-        for i in range(k):
-            xSum = 0
-            ySum = 0
-            numEntries = 0
-            for j in range(m):
-                if clusterAssment[j, 0] == i:
-                    numEntries += 1
-                    xSum += dataMat[j, 0]
-                    ySum += dataMat[j, 1]
+        xySums = np.mat(np.zeros((k, 2)))
+        totalNums = np.mat(np.zeros((k, 1)))
+        for i in range(m):
+            xySums[clusterAssment[i]] += dataMat[i]
+            totalNums[clusterAssment[i]] += 1
 
-            # move the centroid to the mean point
-            centroids[i, 0] = xSum / numEntries
-            centroids[i, 1] = ySum / numEntries
-
+        # move centroids to the mean point for each
+        centroids = xySums / totalNums
 
     return centroids, iterations #is the number of iterations required
 
