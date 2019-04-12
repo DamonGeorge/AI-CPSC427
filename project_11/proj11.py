@@ -52,6 +52,9 @@ def distEucl(vecA,vecB):
 def kMeans(dataMat, k, distMeas=distEucl, createCent=randCent):
     m = np.shape(dataMat)[0]  #how many items in data set
     
+    # allow us to capture a divide by zero warning
+    np.seterr(all='raise')
+
     #create an mX1 natrix filled with -1's (uninititialized value)
     #each row stores centroid information for a point
     #col 0 stores the centroid index to which the point belongs
@@ -80,8 +83,11 @@ def kMeans(dataMat, k, distMeas=distEucl, createCent=randCent):
             xySums[clusterAssment[i]] += dataMat[i]
             totalNums[clusterAssment[i]] += 1
 
-        # move centroids to the mean point for each
-        centroids = xySums / totalNums
+        # move centroids to the mean point for each (for div by 0 error, just restart with random centroids)
+        try:
+            centroids = xySums / totalNums
+        except:
+            centroids = createCent(dataMat, k)
 
     return centroids, iterations #is the number of iterations required
 
