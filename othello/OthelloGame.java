@@ -6,10 +6,10 @@ import java.util.ArrayList;
  * and getting the current state and score of the game. 
  */
 public class OthelloGame {
-	private static final int BOARD_SIZE = 8;
-	private static final char WHITE = 'W';
-	private static final char BLACK = 'B';
-	private static final char EMPTY = 0;
+	public static final int BOARD_SIZE = 8;
+	public static final char WHITE = 'W';
+	public static final char BLACK = 'B';
+	public static final char EMPTY = 0;
 
 	private char[][] board;
 	private int moveNumber;
@@ -28,13 +28,13 @@ public class OthelloGame {
 		if(mirrorInitialConfiguration) {
 			board[3][3] = BLACK;
 			board[3][4] = WHITE;
-			board[4][3] = BLACK;
-			board[4][4] = WHITE;
+			board[4][3] = WHITE;
+			board[4][4] = BLACK;
 		}else {
 			board[3][3] = WHITE;
 			board[3][4] = BLACK;
-			board[4][3] = WHITE;
-			board[4][4] = BLACK;
+			board[4][3] = BLACK;
+			board[4][4] = WHITE;
 		}
 
 		movePending = false;
@@ -246,7 +246,7 @@ public class OthelloGame {
 
 
 
-/*
+
 	public boolean isValidMove(int row, int col) {
 		if(!isValidPosition(row, col))
 			return false;
@@ -282,6 +282,6 @@ public class OthelloGame {
 
 		return false;
 	}
-*/
+
 
 }
