@@ -14,13 +14,13 @@ public class BoardCell extends JPanel implements MouseListener{
 	private char value;
 	private final int row;
 	private final int col;
-	private boolean isValid;
+	private boolean isSelectable;
 	
 	public BoardCell(int row, int col) {
 		this.row = row;
 		this.col = col;
 		
-		isValid = false;
+		isSelectable = false;
 				
 		setOpaque(false);
 		setHighlight(false);
@@ -39,8 +39,12 @@ public class BoardCell extends JPanel implements MouseListener{
 	public void setValue(char val) {
 		value = val;
 	}
-	public void setIsValid(boolean isValid) {
-		this.isValid = isValid;
+	public char getValue() {
+		return value;
+	}
+	
+	public void setIsSelectable(boolean isSelectable) {
+		this.isSelectable = isSelectable;
 	}
 	
 	 @Override
@@ -63,11 +67,12 @@ public class BoardCell extends JPanel implements MouseListener{
     //Mouse Listeners:
 	 
 	 
-	 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		if(isValid) {
-			// TODO do somethings
+		if(isSelectable) {
+			Othello othello = Othello.getInstance();
+			othello.setSelectedCell(row, col);
+			othello.signalEvent(Othello.GameEvent.SELECT);
 		}
 	}
 
@@ -79,12 +84,13 @@ public class BoardCell extends JPanel implements MouseListener{
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		if(isValid)
+		if(isSelectable)
 			setHighlight(true);
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
-		setHighlight(false);
+		if(isSelectable)
+			setHighlight(false);
 	}
 }

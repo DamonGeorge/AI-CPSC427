@@ -5,7 +5,8 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 
 public class MainWindow extends JFrame{
-
+	public static final int WIDTH = 502, HEIGHT = 342;
+	
 	private BoardPanel boardPanel;
 	private ControlPanel controlPanel;
 	
@@ -19,12 +20,21 @@ public class MainWindow extends JFrame{
 		rootPane.add(boardPanel, BorderLayout.CENTER);
 		rootPane.add(controlPanel, BorderLayout.EAST);
 				
-		setMinimumSize(new Dimension(500, 350));
+		setMinimumSize(new Dimension(WIDTH, HEIGHT));
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		pack();
 		
+	}
+	
+	public void updateState(Othello.GameState newState) {
+		boardPanel.updateState(newState);
+		controlPanel.updateState(newState);
+	}
+	
+	public ControlPanel getControlPanel() {
+		return controlPanel;
 	}
 	
 	

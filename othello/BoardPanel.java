@@ -16,15 +16,12 @@ public class BoardPanel extends JPanel{
 	public BoardPanel() {
 		// initialize settings for this panel
 		setBackground(Color.WHITE);
-		setPreferredSize(new Dimension(360, 360));
+		setPreferredSize(new Dimension(MainWindow.WIDTH - ControlPanel.WIDTH, MainWindow.HEIGHT));
 		setLayout(new GridBagLayout());
 		
 		createBoardLabels();
 		
-		createBoard();
-		
-		updateBoard(Othello.getInstance().getGame());
-		
+		createBoard();		
 	}
 	
 	private void createBoardLabels() {
@@ -67,8 +64,8 @@ public class BoardPanel extends JPanel{
 		board = new BoardCell[OthelloGame.BOARD_SIZE][OthelloGame.BOARD_SIZE];
 		for(int i = 0; i < board.length; i++) {
 			for(int j = 0; j < board[0].length; j++) {
-				c.gridx = i;
-				c.gridy = j;
+				c.gridx = j;
+				c.gridy = i;
 				board[i][j] = new BoardCell(i, j);
 				boardContainer.add(board[i][j], c);
 			}
@@ -82,12 +79,35 @@ public class BoardPanel extends JPanel{
 		add(boardContainer, c);
 	}
 	
-	public void updateBoard(OthelloGame game) {
+	
+	public void updateState(Othello.GameState newState) {
+		switch(newState) {
+		case PLAYER_SELECTING:
+			updateBoard(Othello.getInstance().getGame(), true, false);
+			break;
+		case PLAYER_CONFIRMING:
+			updateBoard(Othello.getInstance().getGame(), false, true);
+			break;
+		case AI_CONFIRMING:
+			updateBoard(Othello.getInstance().getGame(), false, true);
+			break;
+		default:
+			updateBoard(Othello.getInstance().getGame(), false, false);
+			break;
+		}
+		
+		revalidate();
+		repaint();
+	}
+	
+	
+	public void updateBoard(OthelloGame game, boolean isSelectable, boolean highlightChanges) {
 		char[][] board = game.getBoard();
 		for(int i = 0; i < board.length; i++) {
 			for(int j = 0; j < board[0].length; j++) {
+				this.board[i][j].setHighlight(highlightChanges && this.board[i][j].getValue() != board[i][j]);
 				this.board[i][j].setValue(board[i][j]);
-				this.board[i][j].setIsValid(game.isValidMove(i, j) && Othello.getInstance().isPlayersTurn());
+				this.board[i][j].setIsSelectable(isSelectable && game.isValidMove(i, j));
 			}
 		}
 	}

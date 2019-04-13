@@ -106,11 +106,15 @@ public class OthelloGame {
 	}
 
 	/**
-	 * Return a copy of the current board
+	 * Return a copy of the current board, or the pending board if a move is pending
 	 */
 	public char[][] getBoard() {
 		char[][] boardCopy = new char[BOARD_SIZE][BOARD_SIZE];
-		copyBoard(board, boardCopy);
+		if(movePending)
+			copyBoard(pendingBoard, boardCopy);
+		else
+			copyBoard(board, boardCopy);
+		
 		return boardCopy;
 	}
 
@@ -177,26 +181,34 @@ public class OthelloGame {
 						}
 					}
 
-					//if a move is possible, set the flag, set the given position to the current color,
-					//and flip all the spaces we traversed above.
+					//if a move is possible, set the flag and flip all the spaces we traversed above.
 					if(flip) {
 						if(!moveFound) moveFound = true;
 
-						resultingBoard[i][j] = currentColor;
-
-						for(currentRow -= deltaRow, currentCol -= deltaCol;
-								currentRow != i && currentCol != j; 
-								currentRow -= deltaRow, currentCol -= deltaCol) {
-
+						currentRow -= deltaRow;
+						currentCol -= deltaCol;
+						while(currentRow != row || currentCol != col) {
 							resultingBoard[currentRow][currentCol] = currentColor;
+							currentRow -= deltaRow;
+							currentCol -= deltaCol;
 						}
 					}
 				}
 			}
 		}
+		//add tile to the space we moved on
+		if(moveFound) resultingBoard[row][col] = currentColor;
+		
 		return moveFound;
 	}
 
+	/**
+	 * Skip a move. Simply moves to the next player
+	 */
+	public void skipMove() {
+		moveNumber++;
+	}
+	
 	/**
 	 * Confirm a previously calculated move. This is irreversible.
 	 */
@@ -243,7 +255,15 @@ public class OthelloGame {
 
 
 
-
+	public boolean isAnyValidMoveAvailable() {
+		for(int i = 0; i < board.length; i++) {
+			for(int j = 0; j < board[0].length; j++) {
+				if(isValidMove(i, j))
+					return true;
+			}
+		}
+		return false;
+	}
 
 
 
