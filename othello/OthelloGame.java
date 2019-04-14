@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 
 /**
  * The Othello game class, holding functionality regarding playing a game of Othello,
@@ -6,19 +5,27 @@ import java.util.ArrayList;
  * and getting the current state and score of the game. 
  */
 public class OthelloGame {
+	//***************************************************
+	//Static Variables
+	//***************************************************
 	public static final int BOARD_SIZE = 8;
 	public static final char WHITE = 'W';
 	public static final char BLACK = 'B';
 	public static final char EMPTY = 0;
-
+	
+	//***************************************************
+	//Instance Variables 
+	//***************************************************
 	private char[][] board;
 	private int moveNumber;
 	private int whiteScore;
 	private int blackScore;
-
 	private char[][] pendingBoard;
 	private boolean movePending;
 
+	//***************************************************
+	//Instance Functions
+	//***************************************************
 	OthelloGame(boolean mirrorInitialConfiguration) {
 		moveNumber = 0;
 		board = new char[BOARD_SIZE][BOARD_SIZE];
@@ -39,22 +46,6 @@ public class OthelloGame {
 
 		movePending = false;
 		pendingBoard = new char[BOARD_SIZE][BOARD_SIZE];
-	}
-
-	/**
-	 * Private utility to copy a board from the src to dest
-	 */
-	private void copyBoard(char[][] src, char[][] dest) {
-		for(int i = 0; i < src.length; i++) {
-			System.arraycopy(src[i], 0, dest[i], 0, src[i].length);
-		}
-	}
-
-	/**
-	 * Private utility for copying the current board to the pending Board
-	 */
-	private void copyCurrentToPending() {
-		copyBoard(board, pendingBoard);
 	}
 
 	/**
@@ -85,18 +76,8 @@ public class OthelloGame {
 	 */
 	public boolean isBlacksMove() {
 		return (moveNumber % 2) == 0;
-	}
-
-	/**
-	 * Check if the provided row and col fit inside the board's dimensions
-	 */
-	public boolean isValidPosition(int row, int col) {
-		if(row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE)
-			return false;
-		else
-			return true;
-	}
-
+	}	
+	
 	//Basic getters for the white and black scores
 	public int getWhiteScore() {
 		return whiteScore;
@@ -130,12 +111,148 @@ public class OthelloGame {
 	}
 
 	/**
-	 * Advanced move function for making a move on the current board at the given position,
-	 * using either black or white depending on the param isBlacksMove. 
-	 * resultingBoard holds the board after the move is made, if a valid move was possible.
-	 * Returns true if a valid move was possible. 
+	 * Skip a move. Simply moves to the next player
 	 */
-	public boolean move(char[][] currentBoard, int row, int col, boolean isBlacksMove, char[][] resultingBoard) {
+	public void skipMove() {
+		moveNumber++;
+	}
+	
+	/**
+	 * Confirm a previously calculated move. This is irreversible.
+	 */
+	public void confirmMove() {
+		if(movePending) {
+			copyPendingToCurrent();
+			updateScores();
+			moveNumber++;
+		}
+	}
+
+	/**
+	 * Cancels a previously calculated move.
+	 */
+	public void cancelMove() {
+		if(movePending) movePending = false;
+	}
+
+	/**
+	 * Check if the given row and column are a valid move for the current player
+	 * @return true if move is valid
+	 */
+	public boolean isValidMove(int row, int col) {
+		return isValidMove(this.board, row, col, isBlacksMove());
+	}
+
+	/**
+	 * Check if any valid move exists on the board for the current player
+	 * @return true if any move exists, false if no move exists
+	 */
+	public boolean isAnyValidMoveAvailable() {
+		for(int i = 0; i < board.length; i++) {
+			for(int j = 0; j < board[0].length; j++) {
+				if(isValidMove(i, j))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	//***************************************************
+	//Static Utility Functions 
+	//***************************************************
+	/**
+	 * Utility to copy a board from the src to dest
+	 */
+	public static void copyBoard(char[][] src, char[][] dest) {
+		for(int i = 0; i < src.length; i++) {
+			System.arraycopy(src[i], 0, dest[i], 0, src[i].length);
+		}
+	}
+	
+	/**
+	 * Check if the provided row and col fit inside the board's dimensions
+	 */
+	public static boolean isValidPosition(int row, int col) {
+		if(row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE)
+			return false;
+		else
+			return true;
+	}
+
+	/**
+	 * Check if the given board has the correct dimensions
+	 */
+	public static boolean isValidBoard(char[][] board) {
+		return board.length == OthelloGame.BOARD_SIZE && board[0].length == OthelloGame.BOARD_SIZE;
+	}
+	
+	/**
+	 * Main utility for checking if a move is valid
+	 * @param board	The othello board
+	 * @param row	The row of the move to check
+	 * @param col	The column of the move to check
+	 * @param isBlacksMove	True if it is currently blacks move
+	 * @return True if the given move is valid. 
+	 */
+	public static boolean isValidMove(char[][] board, int row, int col, boolean isBlacksMove) {
+		if(!isValidBoard(board)) //check board dimensions
+			return false;
+		
+		if(!isValidPosition(row, col)) //check if the given move fits in the board
+			return false;
+
+		if(board[row][col] != EMPTY) //check that the given space is empty
+			return false;
+
+		char currentColor = isBlacksMove ? BLACK : WHITE;
+		char opposingColor = isBlacksMove ? WHITE : BLACK;
+
+		//loop through all adjacent spaces
+		for(int i = row - 1; i <= row + 1; i++) {
+			for(int j = col - 1; j <= col + 1; j++) {
+				//if an adjacent space has an opposing tile, it could have a move
+				if(isValidPosition(i, j) && board[i][j] == opposingColor) {
+					int deltaRow = i - row;
+					int deltaCol = j - col;
+
+					int currentRow = i + deltaRow;
+					int currentCol = j + deltaCol;
+
+					//loop in the direction of the adjacent space.
+					//if an empty is found or the edge of the board is reached, no move is possible
+					//else if a tile of the current player is found, a move is possible and return
+					while(isValidPosition(currentRow, currentCol)) {
+						if(board[currentRow][currentCol] == EMPTY) {
+							break;
+						}else if(board[currentRow][currentCol] == currentColor) {
+							return true;
+						} else {
+							currentRow += deltaRow;
+							currentCol += deltaCol;
+						}
+					}
+				}
+			}
+		}
+		
+		//if we get here, no move was found
+		return false;
+	}
+
+
+	/**
+	 * Main utility for making a move on the current board at the given position.
+	 * @param currentBoard	The current board
+	 * @param row	The row of the move to make
+	 * @param col	The column of the move to make
+	 * @param isBlacksMove	Whether it's black's move
+	 * @param resultingBoard The board after the move is made. Only valid if the move is possible
+	 * @return True if the move was possible.
+	 */
+	public static boolean move(char[][] currentBoard, int row, int col, boolean isBlacksMove, char[][] resultingBoard) {
+		if(!isValidBoard(currentBoard)) //check board dimensions
+			return false;
+		
 		if(!isValidPosition(row, col)) //check if the position is valid
 			return false;
 
@@ -201,107 +318,4 @@ public class OthelloGame {
 		
 		return moveFound;
 	}
-
-	/**
-	 * Skip a move. Simply moves to the next player
-	 */
-	public void skipMove() {
-		moveNumber++;
-	}
-	
-	/**
-	 * Confirm a previously calculated move. This is irreversible.
-	 */
-	public void confirmMove() {
-		if(movePending) {
-			copyPendingToCurrent();
-			updateScores();
-			moveNumber++;
-		}
-	}
-
-	/**
-	 * Cancels a previously calculated move.
-	 */
-	public void cancelMove() {
-		if(movePending) movePending = false;
-	}
-
-	/**
-	 * Get all the board states possible from the current board
-	 */
-	public ArrayList<char[][]> getChildStates(){
-		return getChildStates(board,  isBlacksMove());
-	}
-
-	/**
-	 * Get all the board states possible from the given board,
-	 * depending on whose turn it is.
-	 */
-	public ArrayList<char[][]> getChildStates(char[][] board, boolean isBlacksMove) {
-		ArrayList<char[][]> childStates = new ArrayList<>();
-
-		for(int i = 0; i < board.length; i++) {
-			for(int j = 0; j < board[i].length; j++) {
-				char[][] newBoard = new char[BOARD_SIZE][BOARD_SIZE];
-				boolean success = move(board, i, j, isBlacksMove, newBoard);
-
-				if(success) childStates.add(newBoard);
-			}
-		}
-
-		return childStates;
-	}
-
-
-
-	public boolean isAnyValidMoveAvailable() {
-		for(int i = 0; i < board.length; i++) {
-			for(int j = 0; j < board[0].length; j++) {
-				if(isValidMove(i, j))
-					return true;
-			}
-		}
-		return false;
-	}
-
-
-
-	public boolean isValidMove(int row, int col) {
-		if(!isValidPosition(row, col))
-			return false;
-
-		if(board[row][col] != EMPTY)
-			return false;
-
-		char currentColor = isBlacksMove() ? BLACK : WHITE;
-		char opposingColor = isBlacksMove() ? WHITE : BLACK;
-
-		for(int i = row - 1; i <= row + 1; i++) {
-			for(int j = col - 1; j <= col + 1; j++) {
-				if(isValidPosition(i, j) && board[i][j] == opposingColor) {
-					int deltaRow = i - row;
-					int deltaCol = j - col;
-
-					int currentRow = i + deltaRow;
-					int currentCol = j + deltaCol;
-
-					while(isValidPosition(currentRow, currentCol)) {
-						if(board[currentRow][currentCol] == EMPTY) {
-							break;
-						}else if(board[currentRow][currentCol] == currentColor) {
-							return true;
-						} else {
-							currentRow += deltaRow;
-							currentCol += deltaCol;
-						}
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-
 }
