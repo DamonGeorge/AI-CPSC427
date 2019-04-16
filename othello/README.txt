@@ -16,7 +16,8 @@ Usage:
 	java Othello
 
 Files:
-- AITimer.java 		The timer task used to prevent the AI task from exceeding 10 seconds
+- AIThread.java 	The AI used by the program.
+					This runs as a background thread and attempts to calculate a move in under 10 seconds.
 
 - BoardCell.java 	A cell component of the Board GUI. 
 					This handles drawing tiles and allowing the player to select moves.
@@ -35,8 +36,6 @@ Files:
 					This handles starting the program, creating the windows,
 					and also handles the game state machine, which is updated in the Event Dispatch Thread.
 
-- OthelloAI.java 	The AI used by the program.
-					This runs as a background thread and attempts to calculate a move in under 10 seconds.
 
 - OthelloGame.java	The othello game class holding functionality regarding playing othello, such as making moves,
 					and also holding the current state of the game. 
@@ -47,3 +46,5 @@ Files:
 					for generating children and for calculating heuristics.
 
 - StartDialog.java 	The start dialog for initializing the program
+
+- TimerThread.java 	The timer task used to prevent the AI task from exceeding 10 seconds

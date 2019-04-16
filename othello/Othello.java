@@ -16,8 +16,8 @@ public class Othello {
 	private OthelloGame othelloGame; //the game object
 	private MainWindow window; //the main gui window
 	private GameState currentState; //the currents state of the game
-	private AITimer timer; //holds reference to current timer task
-	private OthelloAI ai; //holds reference to current ai task
+	private TimerThread timer; //holds reference to current timer task
+	private AIThread ai; //holds reference to current ai task
 	private int selectedRow, selectedCol; //the last selected row and col, either selected by player or AI
 	
 	/**
@@ -182,8 +182,8 @@ public class Othello {
 			if(event == GameEvent.START) {
 				changeState(GameState.AI_SELECTING);
 				//TODO: call ai and timer
-				timer = new AITimer();
-				ai = new OthelloAI(othelloGame);
+				timer = new TimerThread();
+				ai = new AIThread(othelloGame);
 				timer.execute();
 				ai.execute();
 			}

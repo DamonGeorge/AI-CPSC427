@@ -239,6 +239,19 @@ public class OthelloGame {
 		return false;
 	}
 
+	/**
+	 * Check if any valid move exists on the board for the given player player
+	 * @return true if any move exists, false if no move exists
+	 */
+	public static boolean isAnyValidMoveAvailable(char[][]board, boolean isBlacksMove) {
+		for(int i = 0; i < board.length; i++) {
+			for(int j = 0; j < board[0].length; j++) {
+				if(isValidMove(board, i, j, isBlacksMove))
+					return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Main utility for making a move on the current board at the given position.

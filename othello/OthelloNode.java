@@ -1,7 +1,8 @@
 import java.util.ArrayList;
 
 public class OthelloNode {
-	//Todo: handle skip moves for the row and col members
+	//TODO: handle skip moves for the row and col members
+	//TODO: handle leaf nodes in calcChildren and calcHeuristic
 	
 	//***************************************************
 	//Static Variables
@@ -15,75 +16,120 @@ public class OthelloNode {
 	//Instance Variables
 	//***************************************************
 	private char[][] board;
-	private int previousMoveRow;
-	private int previousMoveCol;
+	private OthelloMove previousMove;
 	private boolean isBlacksMove;
 	private ArrayList<OthelloNode> children;
-	private Double heuristicValue;
-
+	private int zobristHash;
+//	private OthelloAI parentAI;
+//	private Double heuristicValue;
+	
 	//***************************************************
 	//Instance Functions
 	//***************************************************
-	public OthelloNode(char[][] board, int previousMoveRow, int previousMoveCol, boolean isBlacksMove) {
+	//overloaded constructors
+	public OthelloNode(char[][] board, boolean isBlacksMove, int zobristHash) {
+		this(board, isBlacksMove, zobristHash, null);
+	}
+//	public OthelloNode(char[][] board, boolean isBlacksMove, OthelloAI parentAI, Integer zobristHash) {
+//		this(board, isBlacksMove, parentAI, null, zobristHash);
+//	}
+	public OthelloNode(char[][] board, boolean isBlacksMove, int zobristHash, int previousMoveRow, int previousMoveCol) {
+		this(board, isBlacksMove, zobristHash, new OthelloMove(previousMoveRow, previousMoveCol));
+	}
+//	public OthelloNode(char[][] board, boolean isBlacksMove, OthelloAI parentAI, int previousMoveRow, int previousMoveCol, Integer zobristHash) {
+//		this(board, isBlacksMove, parentAI, new OthelloMove(previousMoveRow, previousMoveCol), zobristHash);
+//	}
+//	public OthelloNode(char[][] board, boolean isBlacksMove, OthelloAI parentAI, OthelloMove previousMove) {
+//		this(board, isBlacksMove, parentAI, previousMove, null);
+//	}
+	public OthelloNode(char[][] board, boolean isBlacksMove, int zobristHash, OthelloMove previousMove) {
 		this.board = board;
-		this.previousMoveRow = previousMoveRow;
-		this.previousMoveCol = previousMoveCol;
 		this.isBlacksMove = isBlacksMove;
+		this.previousMove = previousMove;
+		this.zobristHash = zobristHash;
+//		this.parentAI = parentAI;
 		this.children = null;
-		this.heuristicValue = null;
+//		this.heuristicValue = null;
 	}
 
 	//Getters
+	public char[][] getBoard() {
+		return board;
+	}
+	public boolean getIsBlacksMove() {
+		return isBlacksMove;
+	}
 	public ArrayList<OthelloNode> getChildren() {
-		if(children == null) //calculate if necessary
-			children = calculateChildNodes(board, isBlacksMove);
-		
 		return children;
 	}
-	public double getHeuristicValue() {
-		if(heuristicValue == null) //calculate if necessary
-			calculateFullHeuristic(board, isBlacksMove);
-		
-		return heuristicValue;
-	}
-	public int getPreviousMoveRow() {
-		return previousMoveRow;
-	}
-	public int getPreviousMoveCol() {
-		return previousMoveCol;
+//	public double getHeuristicValue() {
+//		if(heuristicValue == null) //calculate if necessary
+//			calculateFullHeuristic(board, isBlacksMove);
+//		
+//		return heuristicValue;
+//	}
+	public OthelloMove getPreviousMove() {
+		return previousMove;
 	}
 	public boolean isBlacksMove() {
 		return isBlacksMove;
 	}
+	
+	public int getZobristHash() {
+		return zobristHash;
+	}
+	
+	
+	//setters
+	public void setChildren(ArrayList<OthelloNode> children) {
+		this.children = children;
+	}
+	
+	
+	
+	
+	
+	
+	
+	public Double calculateFullHeuristic() {
+		return calculateFullHeuristic(board, isBlacksMove);
+	}
+	
+	//Necessary for using as hashmap key
+	@Override
+	public int hashCode() {
+		return getZobristHash();
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		//basic checks
+		if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (getClass() != o.getClass())
+            return false;
+        
+        //check if boards are equal
+        OthelloNode node = (OthelloNode) o;
+        for(int i = 0; i < board.length; i++) {
+        	for(int j = 0; j < board[0].length; j++) {
+        		if(this.board[i][j] != node.board[i][j])
+        			return false;
+        	}
+        }
+        
+        return true;
+	}
+	
 	
 	
 	//***************************************************
 	//Static Utility Functions 
 	//***************************************************
 	
-	public ArrayList<OthelloNode> calculateChildNodes(char[][] board, boolean isBlacksMove) {
-		ArrayList<OthelloNode> children = new ArrayList<>();
-		char[][] newBoard = null;
-		for(int i = 0; i < OthelloGame.BOARD_SIZE; i++) {
-			for(int j = 0; j < OthelloGame.BOARD_SIZE; j++) {
-				newBoard = new char[OthelloGame.BOARD_SIZE][OthelloGame.BOARD_SIZE];
-				boolean success = OthelloGame.move(board, i, j, isBlacksMove, newBoard);
-
-				if(success) {
-					children.add(new OthelloNode(newBoard, i, j, !isBlacksMove));
-				}
-			}
-		}
-		
-		if(children.isEmpty()) {
-			OthelloGame.copyBoard(board, newBoard);
-			children.add(new OthelloNode(newBoard, 0, 0, !isBlacksMove));
-		}
-			
-		
-		return children;
-	}
-	
+	//TODO: move this stuff to OthelloAI class maybe?
 	public static double calculateHeuristicValue(int blacksValue, int whitesValue, boolean isBlacksMove) {
 		int diff = blacksValue - whitesValue;
 		if(!isBlacksMove) diff = -diff;
@@ -148,6 +194,12 @@ public class OthelloNode {
 				}
 			}
 		}
+		
+		//if this is a leaf node
+		if(numLegalMovesBlack == 0 && numLegalMovesWhite == 0) {
+			return 100; //TODO: don't we need to know whether the AI is black or not to do this right?
+		}
+		
 		
 		//handle corners
 		int[] cornerRow = {0, 0, OthelloGame.BOARD_SIZE-1, OthelloGame.BOARD_SIZE-1};
@@ -264,5 +316,8 @@ public class OthelloNode {
 		
 		return STABLE;
 	}
+	
+	
+	
 	
  }
