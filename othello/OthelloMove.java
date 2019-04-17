@@ -28,4 +28,14 @@ public class OthelloMove {
 	public void setCol(int col) {
 		this.col = col;
 	}
+	
+	public boolean equals(OthelloMove move) {
+		if(move == null)
+			return false;
+		
+		if(this.row == move.getRow() && this.col == move.getCol())
+			return true;
+		else
+			return false;
+	}
 }

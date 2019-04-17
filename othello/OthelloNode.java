@@ -20,6 +20,8 @@ public class OthelloNode {
 	private boolean isBlacksMove;
 	private ArrayList<OthelloNode> children;
 	private int zobristHash;
+	private Integer score;
+	
 //	private OthelloAI parentAI;
 //	private Double heuristicValue;
 	
@@ -30,44 +32,26 @@ public class OthelloNode {
 	public OthelloNode(char[][] board, boolean isBlacksMove, int zobristHash) {
 		this(board, isBlacksMove, zobristHash, null);
 	}
-//	public OthelloNode(char[][] board, boolean isBlacksMove, OthelloAI parentAI, Integer zobristHash) {
-//		this(board, isBlacksMove, parentAI, null, zobristHash);
-//	}
 	public OthelloNode(char[][] board, boolean isBlacksMove, int zobristHash, int previousMoveRow, int previousMoveCol) {
 		this(board, isBlacksMove, zobristHash, new OthelloMove(previousMoveRow, previousMoveCol));
 	}
-//	public OthelloNode(char[][] board, boolean isBlacksMove, OthelloAI parentAI, int previousMoveRow, int previousMoveCol, Integer zobristHash) {
-//		this(board, isBlacksMove, parentAI, new OthelloMove(previousMoveRow, previousMoveCol), zobristHash);
-//	}
-//	public OthelloNode(char[][] board, boolean isBlacksMove, OthelloAI parentAI, OthelloMove previousMove) {
-//		this(board, isBlacksMove, parentAI, previousMove, null);
-//	}
+
 	public OthelloNode(char[][] board, boolean isBlacksMove, int zobristHash, OthelloMove previousMove) {
 		this.board = board;
 		this.isBlacksMove = isBlacksMove;
 		this.previousMove = previousMove;
 		this.zobristHash = zobristHash;
-//		this.parentAI = parentAI;
 		this.children = null;
-//		this.heuristicValue = null;
+		this.score = null;
 	}
 
 	//Getters
 	public char[][] getBoard() {
 		return board;
 	}
-	public boolean getIsBlacksMove() {
-		return isBlacksMove;
-	}
 	public ArrayList<OthelloNode> getChildren() {
 		return children;
 	}
-//	public double getHeuristicValue() {
-//		if(heuristicValue == null) //calculate if necessary
-//			calculateFullHeuristic(board, isBlacksMove);
-//		
-//		return heuristicValue;
-//	}
 	public OthelloMove getPreviousMove() {
 		return previousMove;
 	}
@@ -79,70 +63,33 @@ public class OthelloNode {
 		return zobristHash;
 	}
 	
-	
 	//setters
 	public void setChildren(ArrayList<OthelloNode> children) {
 		this.children = children;
 	}
 	
 	
-	
-	
-	
-	
-	
-	public Double calculateFullHeuristic() {
-		return calculateFullHeuristic(board, isBlacksMove);
-	}
-	
-	//Necessary for using as hashmap key
-	@Override
-	public int hashCode() {
-		return getZobristHash();
-	}
-	
-	@Override
-	public boolean equals(Object o) {
-		//basic checks
-		if (this == o)
-            return true;
-        if (o == null)
-            return false;
-        if (getClass() != o.getClass())
-            return false;
-        
-        //check if boards are equal
-        OthelloNode node = (OthelloNode) o;
-        for(int i = 0; i < board.length; i++) {
-        	for(int j = 0; j < board[0].length; j++) {
-        		if(this.board[i][j] != node.board[i][j])
-        			return false;
-        	}
-        }
-        
-        return true;
-	}
-	
-	
-	
-	//***************************************************
-	//Static Utility Functions 
-	//***************************************************
-	
-	//TODO: move this stuff to OthelloAI class maybe?
-	public static double calculateHeuristicValue(int blacksValue, int whitesValue, boolean isBlacksMove) {
-		int diff = blacksValue - whitesValue;
-		if(!isBlacksMove) diff = -diff;
+	public int getLeafScore(boolean isAIBlack) {
+		if(this.score == null) {
+			int whiteScore = 0;
+			int blackScore = 0;
+			
+			for(int i = 0; i < board.length; i++) {
+	        	for(int j = 0; j < board[0].length; j++) {
+	        		if(this.board[i][j] == OthelloGame.BLACK) blackScore++;
+	        		else if (this.board[i][j] == OthelloGame.WHITE) whiteScore++;
+	        	}
+	        }
+			if(isAIBlack)
+				this.score = blackScore - whiteScore;
+			else
+				this.score = whiteScore - blackScore;
+		}
 		
-		int sum = blacksValue + whitesValue;
-		
-		if(sum != 0)
-			return diff/sum;
-		else
-			return 0.0;
+		return this.score * 1000; //TODO: is this necessary
 	}
 	
-	public static double calculateFullHeuristic(char[][]board, boolean isBlacksMove) {
+	public double calculateFullHeuristic(boolean isPlayerBlack) {
 		//for count heuristic
 		int whiteScore = 0;
 		int blackScore = 0;
@@ -176,7 +123,7 @@ public class OthelloNode {
 					blackScore++; //for count heuristic
 					
 					//for stability heuristic
-					int stability = getStability(board, i, j);
+					int stability = getStability(i, j);
 					if(stability == STABLE) numStableBlack++;
 					else if(stability == UNSTABLE) numUnstableBlack++;
 					else numSemiStableBlack++;
@@ -186,7 +133,7 @@ public class OthelloNode {
 					whiteScore++; //for count heuristic
 					
 					//for stability heuristic
-					int stability = getStability(board, i, j);
+					int stability = getStability(i, j);
 					if(stability == STABLE) numStableWhite++;
 					else if(stability == UNSTABLE) numUnstableWhite++;
 					else numSemiStableWhite++;
@@ -197,7 +144,7 @@ public class OthelloNode {
 		
 		//if this is a leaf node
 		if(numLegalMovesBlack == 0 && numLegalMovesWhite == 0) {
-			return 100; //TODO: don't we need to know whether the AI is black or not to do this right?
+			return getLeafScore(isPlayerBlack); //TODO: don't we need to know whether the AI is black or not to do this right?
 		}
 		
 		
@@ -222,30 +169,72 @@ public class OthelloNode {
 		}
 		
 		//heuristic values
-		double countHeuristic = calculateHeuristicValue(blackScore, whiteScore, isBlacksMove);
-		double actualMobilityHeuristic = calculateHeuristicValue(numLegalMovesBlack, numLegalMovesWhite, isBlacksMove);
-		double stableHeuristic = calculateHeuristicValue(numStableBlack, numStableWhite, isBlacksMove);
-		double unstableHeuristic = calculateHeuristicValue(numUnstableBlack, numUnstableWhite, isBlacksMove);
-		double semiStableHeuristic = calculateHeuristicValue(numSemiStableBlack, numSemiStableWhite, isBlacksMove);
-		double cornersHeuristic = calculateHeuristicValue(numCornersBlack, numCornersWhite, isBlacksMove);
-		double potentialCornersHeuristic = calculateHeuristicValue(numPotentialCornersBlack, numPotentialCornersWhite, isBlacksMove);
+		double countHeuristic = calculateHeuristicValue(blackScore, whiteScore, isPlayerBlack);
+		double actualMobilityHeuristic = calculateHeuristicValue(numLegalMovesBlack, numLegalMovesWhite, isPlayerBlack);
+		double stableHeuristic = calculateHeuristicValue(numStableBlack, numStableWhite, isPlayerBlack);
+		double unstableHeuristic = calculateHeuristicValue(numUnstableBlack, numUnstableWhite, isPlayerBlack);
+		double semiStableHeuristic = calculateHeuristicValue(numSemiStableBlack, numSemiStableWhite, isPlayerBlack);
+		double cornersHeuristic = calculateHeuristicValue(numCornersBlack, numCornersWhite, isPlayerBlack);
+		double potentialCornersHeuristic = calculateHeuristicValue(numPotentialCornersBlack, numPotentialCornersWhite, isPlayerBlack);
 		
+		System.out.println(this);
 		//calculate final value
 		return countHeuristic*HEURISTIC_WEIGHTS[0] + actualMobilityHeuristic*HEURISTIC_WEIGHTS[1] + stableHeuristic*HEURISTIC_WEIGHTS[2]
 				+ unstableHeuristic*HEURISTIC_WEIGHTS[3] + semiStableHeuristic*HEURISTIC_WEIGHTS[4] + cornersHeuristic*HEURISTIC_WEIGHTS[5]
 				+ potentialCornersHeuristic*HEURISTIC_WEIGHTS[6];
 	}
 	
+	//Necessary for using as hashmap key
+	@Override
+	public int hashCode() {
+		return getZobristHash();
+	}
 	
-	public static int getStability(char[][] board, int row, int col) {
+	@Override
+	public boolean equals(Object o) {
+		//basic checks
+		if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (getClass() != o.getClass())
+            return false;
+        
+        //check if boards are equal
+        OthelloNode node = (OthelloNode) o;
+        for(int i = 0; i < board.length; i++) {
+        	for(int j = 0; j < board[0].length; j++) {
+        		if(this.board[i][j] != node.board[i][j])
+        			return false;
+        	}
+        }
+        
+        return true;
+	}
+	
+	public double calculateHeuristicValue(int blacksValue, int whitesValue, boolean isPlayerBlack) {
+		int diff = isPlayerBlack ? blacksValue - whitesValue : whitesValue - blacksValue;
+		
+		int sum = blacksValue + whitesValue;
+		
+		if(sum != 0)
+			return diff/sum;
+		else
+			return 0.0;
+	}
+	
+	
+	public int getStability(int row, int col) {
 		boolean isBlacksMove =  board[row][col] == OthelloGame.BLACK;
 		char opposingColor = isBlacksMove ? OthelloGame.WHITE : OthelloGame.BLACK;
 		
 		int[] deltaRow = {0, 1, 1, -1};
-		int[] deltaCol = {1, 0, -1, 1};
+		int[] deltaCol = {1, 0, 1, 1};
 		
 		int currentRow = row;
 		int currentCol = col;
+		
+		boolean isSemiStable = false;
 		
 		//loop through each direction
 		for(int i = 0; i < 4; i++) {
@@ -310,14 +299,39 @@ public class OthelloNode {
 			}
 			else if ((firstSideHasPossibleMove || firstSideHasOpenSpace)
 					&& (secondSideHasPossibleMove || secondSideHasOpenSpace)) {
-				return SEMI_STABLE;
+				isSemiStable = true;
 			}
 		}
-		
-		return STABLE;
+		if(isSemiStable)
+			return SEMI_STABLE;
+		else
+			return STABLE;
 	}
 	
-	
+	@Override
+	public String toString() {
+		String value = 		"********** Othello Node **********\n";
+		if(previousMove != null)
+			value += String.format("Previous Move: %d, %d\n", previousMove.getRow(), previousMove.getCol());
+		
+		value +=  String.format("Is Black's Move: %b\n", isBlacksMove)
+				+ String.format("Zobrist Hash: %d\n", zobristHash)
+				+ "[\n";
+		
+		for(int i = 0; i < board.length; i++) {
+			for(int j = 0; j < board[0].length; j++) {
+				if(board[i][j] == OthelloGame.EMPTY)
+					value += " , ";
+				else 
+					value += board[i][j] + ", ";
+			}
+			value += "\n";
+		}
+		
+		value += "]\n";
+		
+		return value;
+	}
 	
 	
  }

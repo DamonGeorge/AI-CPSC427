@@ -16,9 +16,10 @@ public class Othello {
 	private OthelloGame othelloGame; //the game object
 	private MainWindow window; //the main gui window
 	private GameState currentState; //the currents state of the game
-	private TimerThread timer; //holds reference to current timer task
-	private AIThread ai; //holds reference to current ai task
+	private TimerThread timerThread; //holds reference to current timer task
+	private AIThread aiThread; //holds reference to current ai task
 	private int selectedRow, selectedCol; //the last selected row and col, either selected by player or AI
+	private OthelloAI ai;
 	
 	/**
 	 * Get the singleton object for this class
@@ -59,6 +60,9 @@ public class Othello {
 		
 		//create game object
 		othelloGame = new OthelloGame(!dialog.useDefaultBoard());
+		
+		//create ai
+		ai = new OthelloAI(othelloGame, !isPlayerBlack);
 		
 		//set starting game state
 		if(isPlayerBlack) 
@@ -113,13 +117,13 @@ public class Othello {
 			if(event == GameEvent.SELECT) {
 				boolean success = othelloGame.move(selectedRow, selectedCol);
 				if(success) {
-					timer.cancel(true); //cancel timer if running
+					timerThread.cancel(true); //cancel timer if running
 					changeState(GameState.AI_CONFIRMING);
 				}
 			}else if (event == GameEvent.AI_FAIL) {
 				changeState(GameState.AI_UNABLE_TO_MOVE);
 			}else if (event == GameEvent.TIMER_EXPIRED) {
-				ai.cancel(true);
+				aiThread.cancel(true);
 				changeState(GameState.AI_FORFEIT);
 			}
  			break;
@@ -129,6 +133,7 @@ public class Othello {
 			//if cancel, go back to player selecting state
 			if(event == GameEvent.CONFIRM) {
 				othelloGame.confirmMove();
+				ai.move(selectedRow, selectedCol);
 				
 				if(othelloGame.isAnyValidMoveAvailable())
 					changeState(GameState.AI_WAITING);
@@ -144,6 +149,7 @@ public class Othello {
 			//same as the player confirming state, except for the AIs turn
 			if(event == GameEvent.CONFIRM) {
 				othelloGame.confirmMove();
+				ai.move(selectedRow, selectedCol);
 				
 				if(othelloGame.isAnyValidMoveAvailable())
 					changeState(GameState.PLAYER_SELECTING);
@@ -160,6 +166,8 @@ public class Othello {
 			//the game ends
 			if(event == GameEvent.CONTINUE) {
 				othelloGame.skipMove();
+				ai.skipMove();
+				
 				if(othelloGame.isAnyValidMoveAvailable())
 					changeState(GameState.PLAYER_SELECTING);
 				else
@@ -170,6 +178,8 @@ public class Othello {
 			//same as the ai unable to move state, except during the players turn
 			if(event == GameEvent.CONTINUE) {
 				othelloGame.skipMove();
+				ai.skipMove();
+				
 				if(othelloGame.isAnyValidMoveAvailable())
 					changeState(GameState.AI_WAITING);
 				else
@@ -182,10 +192,10 @@ public class Othello {
 			if(event == GameEvent.START) {
 				changeState(GameState.AI_SELECTING);
 				//TODO: call ai and timer
-				timer = new TimerThread();
-				ai = new AIThread(othelloGame);
-				timer.execute();
-				ai.execute();
+				timerThread = new TimerThread();
+				aiThread = new AIThread(ai);
+				timerThread.execute();
+				aiThread.execute();
 			}
 			break;
 		default:
@@ -199,9 +209,6 @@ public class Othello {
 	
 	public OthelloGame getGame() {
 		return othelloGame;
-	}
-	public boolean isPlayersTurn() {
-		return isPlayerBlack && othelloGame.isBlacksMove();
 	}
 	public GameState getCurrentGameState() {
 		return currentState;
