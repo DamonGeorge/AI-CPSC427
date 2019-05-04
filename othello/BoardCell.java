@@ -67,7 +67,7 @@ public class BoardCell extends JPanel implements MouseListener{
 	protected void paintComponent(Graphics g) {
 	   super.paintComponent(g);
 	   
-	   // draw the circle here
+	   // draw the circle here if necessary
 	   if(value == OthelloGame.BLACK) {
 		   g.setColor(Color.BLACK);
 		   g.fillOval(5, 5, 30, 30);

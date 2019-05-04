@@ -94,6 +94,7 @@ public class Othello {
 		window.updateState(currentState);
 	}
 	
+	
 	/**
 	 * The state machine for the game. This should be called from the Event Dispatcher Thread.
 	 * Events in the ControlPanel or BoardPanel are sent to this method to update the game and the GUI.
@@ -227,6 +228,9 @@ public class Othello {
 		return window;
 	}
 
+	
+	
+	
 	
 	
 	/**

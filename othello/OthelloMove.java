@@ -1,4 +1,3 @@
-
 /**
  * Basic class for representing the row and column 
  * of a move in Othello. 

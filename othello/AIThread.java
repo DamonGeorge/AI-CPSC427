@@ -26,35 +26,11 @@ public class AIThread extends SwingWorker<OthelloMove, Void>{
 	 * @return True if a move is found, false if no move is found or if the task was interrupted
 	 */
 	public OthelloMove move() {
-		OthelloNode node =  ai.findBestMove(6);
+		OthelloNode node =  ai.findBestMove(7);
 		if(node == null)
 			return null;
 		else 
 			return node.getPreviousMove();
-		
-//		//sleep a random number of seconds from 1 to 15
-//		//return if cancelled
-//		Random rand = new Random();
-//		int n = rand.nextInt(15);
-//		try {
-//			Thread.sleep(1000 * n);
-//		}catch(InterruptedException e) {
-//			System.out.println("AI Cancelled");
-//			return false;
-//		}
-//		
-//		//find first valid move and return it
-//		for(int i = 0; i < OthelloGame.BOARD_SIZE; i++) {
-//			for(int j = 0; j < OthelloGame.BOARD_SIZE; j++) {
-//				if(game.isValidMove(i, j)) {
-//					result[0] = i;
-//					result[1] = j;
-//					return true;
-//				}
-//			}
-//		}
-//		//if we get here, no move was found
-//		return false;
 	}
 	
 

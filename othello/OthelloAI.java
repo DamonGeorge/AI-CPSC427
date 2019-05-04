@@ -3,22 +3,32 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ * The AI for playing Othello that uses alpha beta pruning, Zobrist Hashing, and heuristic evaluation
+ * to decide the next best move in the current game.
+ */
 public class OthelloAI {
 
-	private int[][][] zobristTable;
-//	private OthelloGame game;
-	private OthelloNode currentOthelloNode;
-	private HashMap<OthelloNode, Double> heuristicMap;
-	private boolean isAIBlack;
+	private int[][][] zobristTable; //the table of random values for hashing game boards
+	private OthelloNode currentOthelloNode; //the current node in the Othello state space
+	private HashMap<OthelloNode, Double> heuristicMap; //the hashmap for heuristics
+	private boolean isAIBlack; //whether the AI is the black player or not
 	
-	
+	/**
+	 * Create an Othello AI instance using the given game
+	 * and whether the AI is black.
+	 */
 	public OthelloAI(OthelloGame game, boolean isAIBlack) {
 		this.isAIBlack = isAIBlack;
+		
+		//initialize the zobrist hashing
 		initZobristTable();
 		heuristicMap = new HashMap<>(1000);
 		
+		//create the starting othello node
 		currentOthelloNode = new OthelloNode(game.getBoard(), game.isBlacksMove(), calculateZobristHash(game.getBoard()));
-		System.out.println(currentOthelloNode);
+		
+//		System.out.println(currentOthelloNode);
 	}
 	
 	/**
@@ -38,7 +48,7 @@ public class OthelloAI {
 	
 	/**
 	 * Make the given move and advance to the child node created by that move.
-	 * Returns true if the move was valid and the corresponding child node was found
+	 * Returns true if the move was valid and the corresponding child node was found.
 	 */
 	public boolean move(OthelloMove move) {
 		ArrayList<OthelloNode> children = getChildren(currentOthelloNode);
@@ -74,37 +84,43 @@ public class OthelloAI {
 	}
 	
 	
+	
 	/**
-	 * This is the main functionality of this AI: to find the next best move.
+	 * This is the main functionality of this AI: to find the next best move using alpha beta pruning.
 	 * This returns the OthelloNode that is the best child of the current node.
 	 * This can be null if the depthLimit is 0, if the current node is an end state,
 	 * or if the current node is not this AI's turn.
 	 */
 	public OthelloNode findBestMove(int depthLimit) {
-		System.out.println(currentOthelloNode);
+//		System.out.println(currentOthelloNode);
 		
-		if(depthLimit == 0)
-			return null;
+		if(depthLimit == 0) return null;
 		
 		ArrayList<OthelloNode> children = getChildren(currentOthelloNode);
 		
-		if(children.isEmpty())
-			return null;
+		//check if end state
+		if(children.isEmpty()) return null;
 
+		//initialize values for alpha beta search
 		OthelloNode bestChild = null;
 		double alpha = Double.NEGATIVE_INFINITY;
 		double beta = Double.POSITIVE_INFINITY;
 		
+		//only search if it's the AI's turn
 		if(isAIsTurn(this.currentOthelloNode)) {
 			for(OthelloNode child : children) {
-				System.out.println(child);
+//				System.out.println(child);
 				
+				//do the search
 				double value = alphaBetaSearch(child, alpha, beta, depthLimit, 1);
+				
+				//if we've found a better alpha, update the best child
 				if(value > alpha) {
 					alpha = value;
 					bestChild = child;
 				}
 				
+				//prune
 				if(alpha >= beta)
 					break;
 			}
@@ -127,7 +143,7 @@ public class OthelloAI {
 				
 		if(isAIsTurn(node)) { //MAX
 			for(OthelloNode child : children) {
-				System.out.println(child);
+//				System.out.println(child);
 				
 				alpha = Math.max(alpha, alphaBetaSearch(child, alpha, beta, depthLimit, currentDepth+1));
 				if(alpha >= beta)
@@ -137,7 +153,7 @@ public class OthelloAI {
 			
 		}else { //MIN
 			for(OthelloNode child : children) {
-				System.out.println(child);
+//				System.out.println(child);
 				
 				beta = Math.min(beta, alphaBetaSearch(child, alpha, beta, depthLimit, currentDepth+1));
 				if(alpha >= beta)
@@ -149,8 +165,11 @@ public class OthelloAI {
 	
 	
 	
-	
-	
+	/**
+	 * Utility for getting the child nodes from the given node.
+	 * This either gets the children from the provided node,
+	 * or generates them for the node.
+	 */
 	public ArrayList<OthelloNode> getChildren(OthelloNode node) {
 		ArrayList<OthelloNode> children = node.getChildren();
 		if(children == null) {
@@ -160,6 +179,11 @@ public class OthelloAI {
 		return node.getChildren();
 	}
 	
+	/**
+	 * Generate the child nodes in the Othello state space for the given node.
+	 * This calculates all possible moves, creates new nodes for the results
+	 * of each of those moves, and calculates the new nodes Zobrist hash.
+	 */
 	public void calculateChildren(OthelloNode node) {
 		ArrayList<OthelloNode> children = new ArrayList<>();
 		char[][] currentBoard = node.getBoard();
@@ -267,11 +291,11 @@ public class OthelloAI {
 //			public int compare(OthelloNode o1, OthelloNode o2) {
 //				double firstValue = getHeuristicValue(o1);
 //				double secondValue = getHeuristicValue(o2);
-//				
+//				//sort descending
 //				if(firstValue < secondValue)
-//					return -1;
-//				else if (firstValue > secondValue)
 //					return 1;
+//				else if (firstValue > secondValue)
+//					return -1;
 //				else
 //					return 0;
 //			}
@@ -281,12 +305,9 @@ public class OthelloAI {
 	}
 	
 	
-	
-	
-	
 	/**
 	 * Get the heuristic value for the given node,
-	 * either by finding it in the current HashMap,
+	 * either by finding it in the HashMap,
 	 * or by calculating it.
 	 * @param node
 	 * @return
@@ -347,10 +368,4 @@ public class OthelloAI {
 		
 		return result;
 	}
-	
-	
-	
-	
-	
-	
 }

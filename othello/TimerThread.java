@@ -1,7 +1,6 @@
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
-
 /**
  * The Timer used to prevent the AI from exceeding 10 seconds.
  * This is implemented as a SwingWorker Thread. 

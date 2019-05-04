@@ -22,6 +22,7 @@ public class ControlPanel extends JPanel implements ActionListener{
 	public static final int WIDTH = 160;
 	
 	//All the text used in the control panel
+	//Uses html in some places to get new lines or underlines
 	private static final String PLAYERS_TURN_TEXT = "<html><u><b>Player's Turn:</b></u></html>";
 	private static final String AIS_TURN_TEXT = "<html><u><b>AI's Turn:</b></u></html>";
 	private static final String CONFIRM_BUTTON_TEXT = "Confirm";
@@ -210,7 +211,7 @@ public class ControlPanel extends JPanel implements ActionListener{
 		continueButton.setVisible(false);
 		timerLabel.setVisible(false);
 		
-		//for each new state,
+		//for each possible new state,
 		//set the value of the turn and text labels
 		//and also set and necessary buttons to be visible
 		

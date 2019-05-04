@@ -27,7 +27,6 @@ public class BoardPanel extends JPanel{
 		setLayout(new GridBagLayout());
 		
 		createBoardLabels();
-		
 		createBoard();		
 	}
 	

@@ -90,7 +90,6 @@ public class StartDialog extends JFrame implements ActionListener{
 		setLocationRelativeTo(null);	
 		pack();
 	}
-
 	
 	/**
 	 * This is the action listener. This just sets which button was clicked
@@ -100,7 +99,6 @@ public class StartDialog extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		this.action = e.getActionCommand();
 	}
-	
 	
 	
 	//Simple getters
