@@ -1,5 +1,3 @@
-import java.util.Arrays;
-import java.util.Random;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -20,8 +18,7 @@ public class AIThread extends SwingWorker<OthelloMove, Void>{
 	}
 	
 	/**
-	 * Make a move. This is the main purpose of the AI. 
-	 * Currently this just picks the first available move, if one exists
+	 * This calls the OthelloAI class to find the best move
 	 * @param result The resulting move's row and col indexes
 	 * @return True if a move is found, false if no move is found or if the task was interrupted
 	 */

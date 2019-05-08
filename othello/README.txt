@@ -4,7 +4,7 @@ Team Member 1: Robert Brajcich
 Team Member 2: Damon George
 Submitted By Damon George
 GU Username: dgeorge2
-Date: 15 April 2019
+Date: 9 May 2019
 '''
 
 Othello final project for Gonzaga University CPSC 427 - Artificial Intelligence
@@ -18,6 +18,8 @@ Usage:
 Files:
 - AIThread.java 	The AI used by the program.
 					This runs as a background thread and attempts to calculate a move in under 10 seconds.
+
+- AITimer.java 		The timer task used to prevent the AI task from exceeding 10 seconds
 
 - BoardCell.java 	A cell component of the Board GUI. 
 					This handles drawing tiles and allowing the player to select moves.
@@ -47,4 +49,4 @@ Files:
 
 - StartDialog.java 	The start dialog for initializing the program
 
-- TimerThread.java 	The timer task used to prevent the AI task from exceeding 10 seconds
+
